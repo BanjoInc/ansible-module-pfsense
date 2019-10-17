@@ -4,7 +4,7 @@
   roles:
     - example_firewall
 
-  vars:  
+  vars:
     net:
       one:
         wanip: 192.2.0.8
