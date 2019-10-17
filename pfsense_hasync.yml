@@ -3,7 +3,8 @@
 - hosts: pfsense
 
   vars:
-    syncip:  10.4.4.4
+    sync_interface: opt2
+    sync_ip:  10.4.4.4
     password: pfsense
 
   tasks:
@@ -24,7 +25,7 @@
          synchronizetrafficshaperlimiter: "on"
          synchronizednsforwarder: "on"
          pfsyncpeerip: "{{ sync_ip }}"
-         pfsyncinterface: opt1
+         pfsyncinterface: "{{ sync_interface }}"
          synchronizetoip: "{{ sync_ip }}"
          username: admin
          password: "{{ password }}"
