@@ -49,21 +49,6 @@
     password: pfsense
     authorizedkeys: "{{ lookup('file', '~/.ssh/authorized_keys' ) | b64encode }}"
 
-- name: Install Packages
-  pkgng: 
-    name: 
-      - pfSense-pkg-haproxy
-      - pfSense-pkg-frr
-      - pfSense-pkg-nmap
-  async: 120
-  when: internet.status is defined and internet.status == 200
- 
-- name: Load BGP Config for FRR
-  pfsense_frr_raw:
-    zebra: zebra.conf
-    bgpd: "{{ frr[site] }}"
-  ignore_errors: yes
-
 - name: Virtual IP Address
   pfsense_virtualip: 
     mode: ipalias
@@ -125,8 +110,8 @@
     system:
       hostname: "{{ inventory_hostname }}"
       domain: "{{domain}}"
-      timezone: Australia/Sydney
-      timeservers: au.pool.ntp.org
+      timezone: America/Denver
+      timeservers: 0.pfsense.pool.ntp.org
       dnsserver:
         - 1.1.1.1
         - 8.8.8.8
@@ -186,17 +171,4 @@
     source: "{{ item.source | default(dict(any='')) }}"
     destination: "{{ item.destination | default(dict(any='')) }}"
   with_items: "{{ fw_filter }}"
-
-
-
-
-
-
-
-
-
-
-
-
-
 
