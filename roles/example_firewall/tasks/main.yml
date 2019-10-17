@@ -37,10 +37,11 @@
   ignore_errors: yes
   when: false
 
-- debug: 
+- debug:
     var: internet
 
-- command: pkg update
+- name: Update pkg
+  command: pkg update
   when: internet.status is defined and internet.status == 200
 
 - name: Set Password & SSH Keys
@@ -50,7 +51,7 @@
     authorizedkeys: "{{ lookup('file', '~/.ssh/authorized_keys' ) | b64encode }}"
 
 - name: Virtual IP Address
-  pfsense_virtualip: 
+  pfsense_virtualip:
     mode: ipalias
     interface: lo0
     uniqid: 5b97488e330e4
@@ -109,7 +110,7 @@
     safe_mode: no       # Some items don't exist yet in pristine untouched firewall
     system:
       hostname: "{{ inventory_hostname }}"
-      domain: "{{domain}}"
+      domain: "{{ domain }}"
       timezone: America/Denver
       timeservers: 0.pfsense.pool.ntp.org
       dnsserver:
