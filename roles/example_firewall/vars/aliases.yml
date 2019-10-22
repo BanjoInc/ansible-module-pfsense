@@ -1,6 +1,5 @@
 ---
 
-
 fw_aliases:
 
   - name: DNS_Servers
@@ -9,18 +8,9 @@ fw_aliases:
     descr: "Name Servers"
     detail: "google||cloudflare"
 
-  - name: NMS_IP
-    type: host
-    address: 172.31.2.1
-    descr: Network Monitoring Servers
-
-  - name: NMS_PORTS
-    type: port
-    address: '161'
-
   - name: NTP_Servers
     type: host
-    address: 203.14.0.250||203.14.0.251
+    address: "0.us.pool.ntp.org"
     detail: tic||toc
 
   - name: rfc1918
