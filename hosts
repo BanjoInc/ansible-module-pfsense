@@ -1,4 +1,3 @@
-
 [pfsense]
-my-test-firewall ansible_host=10.2.2.2 site=one
-my-other-firewall ansible_host=10.3.3.3 site=two
+my-test-firewall ansible_host=10.16.0.2 sync_ip=10.16.0.3 machine_id=one
+my-other-firewall ansible_host=10.16.0.3 sync_ip=10.16.0.2 machine_id=two

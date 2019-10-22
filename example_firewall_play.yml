@@ -1,4 +1,5 @@
 ---
+
 - name: "Setup pfsense firewalls"
   hosts: "pfsense"
   roles:
@@ -7,8 +8,21 @@
   vars:
     net:
       one:
-        wanip: 192.2.0.8
-        wangw: 192.2.0.9
+        wan:
+          ip: 208.53.31.117
+          gw: 208.53.31.113
+          vip: 208.53.51.116
+        lan:
+          ip: 10.16.0.2
+          gw: ''
+          vip: 10.16.0.1
       two:
-        wanip: 192.2.0.10
-        wangw: 192.2.0.11
+        wan:
+          ip: 208.53.31.118
+          gw: 208.53.31.113
+          vip: 208.53.31.116
+        lan:
+          ip: 10.16.0.3
+          gw: ''
+          vip: 10.16.0.1
+
