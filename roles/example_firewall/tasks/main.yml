@@ -1,6 +1,6 @@
 ---
 
-- name: Setup DNS Temporary
+- name: Setup Temporary DNS
   lineinfile:
     path: /etc/resolv.conf
     line: "nameserver {{ item }}"
@@ -9,12 +9,12 @@
     - 8.8.8.8
     - 1.1.1.1
 
-- name: Setup WAN Interfaces
+- name: Setup WAN Interface
   pfsense_interfaces:
     name: wan
     descr: OUTSIDE
-    ipaddr: "{{ net[site].wanip }}"
-    gateway: "{{ net[site].wangw }}"
+    ipaddr: "{{ net[machine_id].wan.ip }}"
+    gateway: "{{ net[machine_id].wan.gw }}"
     subnet: 31
 
 - name: Setup LAN Interface
@@ -28,86 +28,44 @@
     services:
       - interfaces
 
-- name: Test Internet Connection
-  uri:
-    url: http://captive.apple.com
-    status_code: 200
-    timeout: 5
-  register: internet
-  ignore_errors: yes
-  when: false
-
-- debug:
-    var: internet
-
-- name: Update pkg
-  command: pkg update
-  when: internet.status is defined and internet.status == 200
-
 - name: Set Password & SSH Keys
   pfsense_password:
     username: admin
     password: pfsense
     authorizedkeys: "{{ lookup('file', '~/.ssh/authorized_keys' ) | b64encode }}"
 
-- name: Virtual IP Address
+- name: LAN Virtual IP
   pfsense_virtualip:
     mode: ipalias
     interface: lo0
-    uniqid: 5b97488e330e4
-    descr: "Some Service"
+    descr: "WAN"
     type: single
     subnet_bits: 32
-    subnet: "10.98.76.54"
+    subnet: "{{ net[machine_id].lan.vip }}"
     state: present
   check_mode: yes
 
-- name: Create Group
+- name: WAN Virtual IP
+  pfsense_virtualip:
+    mode: ipalias
+    interface: lo0
+    descr: "WAN"
+    type: single
+    subnet_bits: 32
+    subnet: "{{ net[machine_id].wan.vip }}"
+    state: present
+  check_mode: yes
+
+- name: Create Staff Group
   pfsense_group:
     name: Staff
-    description: Internal Staff Users
+    description: Staff Users
     priv:
       - "page-all"
 
-- name: Load SSL Certificate
-  pfsense_cert:
-    refid: "{{ cert['public'] | hash('sha1') }}"
-    descr: "{{ cert['descr'] }}"
-    crt: "{{ cert['public'] }}"
-    prv: "{{ cert['private'] }}"
-
-- name: Widgets
-  pfsense_config:
-    widgets:
-      sequence: "system_information:col1:show,netgate_services_and_support:col2:show,interfaces:col2:show"
-      period: "10"
-
-- name: LDAP Auth Server Config
-  pfsense_authserver:
-    refid: db34caf67ef128
-    type: ldap
-    name: "My Auth Server"
-    host: "ldap.acmecorp.local"
-    ldap_port: 389
-    ldap_urltype: "TCP - Standard"
-    ldap_protver: 3
-    ldap_scope: subtree
-    ldap_basedn: "dc=auth,dc=acmecorp,dc=com"
-    ldap_authcn: "CN=Users,DC=auth,DC=acmecorp,DC=com"
-    ldap_extended_enabled: ""
-    ldap_extended_query: "memberOf=cn=MyTeam"
-    ldap_attr_user: samAccountName
-    ldap_attr_group: cn
-    ldap_attr_member: memberOf
-    ldap_attr_groupobj: group
-    ldap_timeout: 25
-    ldap_binddn: "cn=bind user,cn=Users,dc=auth,dc=acmecorp,dc=com"
-    ldap_bindpw: jhys9ok3kgst1klq6lmls8
-
-
 - name: Configuration
   pfsense_config:
-    safe_mode: no       # Some items don't exist yet in pristine untouched firewall
+    safe_mode: no  # Some items don't exist yet in pristine untouched firewall
     system:
       hostname: "{{ inventory_hostname }}"
       domain: "{{ domain }}"
@@ -117,37 +75,9 @@
         - 1.1.1.1
         - 8.8.8.8
       dnslocalhost: ""
-      disablechecksumoffloading: ""
-      webgui:
-        logincss: "bf7703"
-        loginshowhost: ""
-        webguihostnamemenu: "hostonly"
-        authmode: "My Auth Server"                          # Must match auth server above
-        ssl-certref: "{{ cert['public'] | hash('sha1') }}"  # must match cert above
-        protocol: https
-    snmpd:
-      syslocation: "{{ business_unit }} Firewall {{ net[site].street }}"
-      syscontact: "{{ contact_email }}"
-      rocommunity: public
-      pollport: "161"
-      enable: ""
-      trapenable: ""
-      trapserver: 10.98.76.54
-      trapstring: myrwcomstr
-      bindip: all
-    syslog:
-      filterdescriptions: "1"
-      nentries: "50"
-      remoteserver: "10.1.1.1"
-      remoteserver2: ""
-      remoteserver3: ""
-      sourceip: ""
-      ipproto: ipv4
-      logall: ""
     nat:
       outbound:
         mode: hybrid
-
 
 - name: Firewall Aliases
   pfsense_aliases:
